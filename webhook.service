@@ -1,0 +1,9 @@
+[Unit]
+Description=Webhook receiver for GitHub
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/webhook
+
+[Install]
+WantedBy=multi-user.target
