@@ -64,18 +64,21 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Invalid JSON\n")
 		return
 	}
+	tryTime := "FTP4"
 	if payload.Ref == "refs/heads/gh-pages" {
-		cmdline := fmt.Sprintf("git clean -dfx; git fetch origin %s; git reset --hard FETCH_HEAD", h.Ref)
+		cmdline := fmt.Sprintf("git clean -dfx; git fetch origin %s; git reset --hard FETCH_HEAD;", h.Ref)
+		// -d                    remove whole directories
+		// -x                    remove ignored files, too; -f, --force           force
 		cmd := exec.Command("/bin/sh", "-c", cmdline)
 		cmd.Dir = h.Dir
 		if err := cmd.Start(); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Webhook failed\n")
+			fmt.Fprintf(w, "%s, Webhook failed\n %s",tryTime,err)
 		} else {
-			fmt.Fprintf(w, "OK\n")
+			fmt.Fprintf(w, "%s, OK\n",tryTime)
 		}
 	} else {
-		fmt.Fprintf(w, "Not interested in this ref\n")
+		fmt.Fprintf(w, "%s, Not interested in this ref\n",tryTime)
 	}
 }
 
@@ -88,7 +91,7 @@ func MakeHandler(dir, ref string) func(http.ResponseWriter, *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/_webhook/homepage", MakeHandler("/var/www/homepage", "gh-pages"))
-	http.HandleFunc("/_webhook/static", MakeHandler("/var/www/static", "master"))
+	http.HandleFunc("/_webhook_tsj/homepage", MakeHandler("/staff/shaojiemike/public", "gh-pages"))
+	// http.HandleFunc("/_webhook/static", MakeHandler("/var/www/static", "master"))
 	log.Fatal(http.ListenAndServe("127.0.0.2:9000", nil))
 }
